@@ -36,19 +36,23 @@ class Logic {
     }
 }
 
-var card_height=300;
-var card_width=300;
-var card_height_offset=(-card_height/2);
-var card_width_offset=(-card_width/2).toString();
+var box_dimension=500;
+var card_height=box_dimension;
+var card_width=box_dimension;
+var card_height_offset=-card_height / 2;
+var card_width_offset=-card_width / 2;
+var image_height=box_dimension;
+var image_width=box_dimension;
+
+var standard_picture_offset=box_dimension / 1.5;
 
 class ArtistCard extends Component {
     render() {
-        //console.log("here: ", card_height_offset);
         return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
             <div style={this.props.stylePosition}>
                 <Card style={{width: card_width, height: card_height, position: "relative", top: card_height_offset, left: card_width_offset}}
-                      containerStyle={{width: "300", height: "300"}}>
-                    <CardMedia mediaStyle={{width: "300px", height: "300px", display: "block"}}>
+                      containerStyle={{width: card_width, height: card_height}}>
+                    <CardMedia mediaStyle={{width: image_width, height: image_height, display: "block"}}>
                         <img src={this.props.artist.titleCoverUri} alt="pic1"/>
                     </CardMedia>
                 </Card>
@@ -58,28 +62,68 @@ class ArtistCard extends Component {
 }
 
 class ArtistCards extends Component {
+    selectedCardPosition = {position: "relative", top: "0", left: "0"};
+
     cardPositions = [
-        {position: "relative", top: "-150", left: "-150"},
-        {position: "relative", top: "150", left: "-150"},
-        {position: "relative", top: "150", left: "150"},
-        {position: "relative", top: "-150", left: "150"}
+        {position: "relative", top: -standard_picture_offset, left: -standard_picture_offset},
+        {position: "relative", top: standard_picture_offset, left: -standard_picture_offset},
+        {position: "relative", top: standard_picture_offset, left: standard_picture_offset},
+        {position: "relative", top: -standard_picture_offset, left: standard_picture_offset}
     ];
 
+    state = {
+        previousCardPositions: this.cardPositions
+    };
+
+    randomHoverOffset() {
+        return -.1 + .2 * Math.random();
+    }
+
+    randomStartOffset() {
+        return -40 + 80 * Math.random();
+    }
+
+    componentDidUpdate() {
+        setTimeout(()=> {
+            console.log("hit");
+
+            var cardPositions = this.state.previousCardPositions.map(position => {
+                return {
+                    ...position,
+                    left: position.left + this.randomHoverOffset(),
+                    top: position.top + this.randomHoverOffset()
+                }
+            });
+
+            this.setState({
+                previousCardPositions: cardPositions
+            });
+        }, 1);
+    }
+
     render() {
-        //console.log(this.props.artists);
-        if(Object.keys(this.props.artists).length === 0) {
+        if(this.objectIsEmpty(this.props.artists)) {
             return <div/>;
         }
+
+        //console.log(this.state.previousCardPositions);
+
         return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
-
             {this.props.artists["otherSongs"].map((song, index) => {
-                //console.log("position: ", this.cardPositions[index]);
-                return <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.cardPositions[index]} />
+                //var cardPosition = this.state.previousCardPositions[index];
+                //cardPosition.left += this.randomHoverOffset();
+                //cardPosition.top += this.randomHoverOffset();
+                //this.state.previousCardPositions[index] = cardPosition;
+                console.log(this.state.previousCardPositions);
+                //debugger;
+                return <ArtistCard artist={song} stylePosition={this.state.previousCardPositions[index]} />
             })}
+            <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.selectedCardPosition}/>
+        </div>)
+    }
 
-            <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={{position: "relative", top: "0", left: "0"}}/>
-            
-            </div>)
+    objectIsEmpty(obj) {
+        return Object.keys(obj).length === 0;
     }
 }
 
