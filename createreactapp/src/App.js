@@ -116,7 +116,7 @@ class ArtistCards extends Component {
                 //this.state.previousCardPositions[index] = cardPosition;
                 console.log(this.state.previousCardPositions);
                 //debugger;
-                return <ArtistCard artist={song} stylePosition={this.state.previousCardPositions[index]} />
+                return <ArtistCard key={"song" + index} artist={song} stylePosition={this.state.previousCardPositions[index]} />
             })}
             <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.selectedCardPosition}/>
         </div>)
@@ -155,8 +155,8 @@ class App extends Component {
   render() {
       return (
           <MuiThemeProvider>
-              <div className="App" height="100%" width="100%" backgroundColor="#122329">
-                  <TextField style={{width: "50%"}} onChange={this.onSearchChange} onKeyPress={this.onSearchFieldKeyPress} underlineFocusStyle={{borderColor: "#1BA64E", color: "#1BA64E"}} inputStyle={{color: "#FFFFFF"}}/>
+              <div className="App">
+                  <TextField name="searchField" style={{width: "50%"}} onChange={this.onSearchChange} onKeyPress={this.onSearchFieldKeyPress} underlineFocusStyle={{borderColor: "#1BA64E", color: "#1BA64E"}} inputStyle={{color: "#FFFFFF"}}/>
                   <ArtistCards artists={this.state.artists}/>
               </div>
           </MuiThemeProvider>
