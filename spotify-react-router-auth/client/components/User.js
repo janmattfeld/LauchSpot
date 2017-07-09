@@ -1,59 +1,58 @@
 import React, { Component } from 'react';
-import { connect }      from 'react-redux';
+import { connect } from 'react-redux';
 import {
   getMyInfo,
   setTokens,
-}   from '../actions/actions';
+} from '../actions/actions';
 
-var SpotifyWeb = require('spotify-web-api-js');
+const SpotifyWeb = require('spotify-web-api-js');
 
 /**
  * Our user page
  * Displays the user's information
  */
 class User extends Component {
-
   constructor(props) {
     super(props);
-    //console.log(this.probs);
+    // console.log(this.probs);
     this.state = {
       spotify: new SpotifyWeb(),
       defaultArtist: {
         images: [
           {
-            url: 'http://bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png'
+            url: 'http://bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png',
           }, {
-            url: 'http://bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png'
+            url: 'http://bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png',
           }, {
-            url: 'http://bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png'
-          }
-        ]
-      }
-  };
+            url: 'http://bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png',
+          },
+        ],
+      },
+    };
     console.log(this.state);
   }
 
   /** When we mount, get the tokens from react-router and initiate loading the info */
   componentDidMount() {
     // params injected via react-router, dispatch injected via connect
-    const {dispatch, params} = this.props;
+    const { dispatch, params } = this.props;
     const {accessToken, refreshToken} = params;
-    this.setState({artist: this.state.defaultArtist});
+    this.setState({ artist: this.state.defaultArtist });
     this.state.spotify.setAccessToken(accessToken);
-    dispatch(setTokens({accessToken, refreshToken}));
+    dispatch(setTokens({ accessToken, refreshToken }));
     dispatch(getMyInfo());
   }
 
-  handleSearchInput(e){
-    console.log("Handler triggered");
-     if (!e.target.value) {
+  handleSearchInput (e) {
+    console.log('Handler triggered');
+    if (!e.target.value) {
       // No search value -> reset
-      this.setState({artist: this.state.defaultArtist})
-      return
+      this.setState({ artist: this.state.defaultArtist });
+      return;
     }
 
     // Search for an Artist on Spotify
-    console.log("Searching for Artist");
+    console.log('Searching for Artist')
     this.state.spotify.searchArtists(e.target.value, (err, data) => {
         if (err) {
           console.log("Error in Spotify artist search");
@@ -108,7 +107,8 @@ class User extends Component {
   /** Render the user's info */
   render() {
     const { accessToken, refreshToken, user } = this.props;
-    const { loading, display_name, images, id, email, external_urls, href, country, product } = user;
+    const { loading, display_name, images, id, email,
+      external_urls, href, country, product } = user;
     // if we're still loading, indicate such
     if (loading) {
       return <h2>Loading...</h2>;
@@ -126,7 +126,7 @@ class User extends Component {
             <h2>{artistName}</h2>
           </div>
           <input type={'text'} onChange={this.handleSearchInput.bind(this)}/>
-          {/* Spotify Player is not synced to current playback 
+          {/* Spotify Player is not synced to current playback
           <div className='SpotifyPlayer'>
           <iframe src="https://open.spotify.com/embed?uri=spotify:user:blzonline:playlist:5mHZgvgf7qPAg2IpY8Ovej" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
           </div>
