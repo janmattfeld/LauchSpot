@@ -36,12 +36,17 @@ class Logic {
     }
 }
 
+var card_height=300;
+var card_width=300;
+var card_height_offset=(-card_height/2);
+var card_width_offset=(-card_width/2).toString();
+
 class ArtistCard extends Component {
     render() {
-        console.log("here: ", this.props.stylePosition);
+        //console.log("here: ", card_height_offset);
         return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
             <div style={this.props.stylePosition}>
-                <Card style={{width: "300", height: "300", position: "relative", top: "-150", left: "-150"}}
+                <Card style={{width: card_width, height: card_height, position: "relative", top: card_height_offset, left: card_width_offset}}
                       containerStyle={{width: "300", height: "300"}}>
                     <CardMedia mediaStyle={{width: "300px", height: "300px", display: "block"}}>
                         <img src={this.props.artist.titleCoverUri} alt="pic1"/>
@@ -61,14 +66,14 @@ class ArtistCards extends Component {
     ];
 
     render() {
-        console.log(this.props.artists);
+        //console.log(this.props.artists);
         if(Object.keys(this.props.artists).length === 0) {
             return <div/>;
         }
         return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
 
             {this.props.artists["otherSongs"].map((song, index) => {
-                console.log("position: ", this.cardPositions[index]);
+                //console.log("position: ", this.cardPositions[index]);
                 return <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.cardPositions[index]} />
             })}
 
@@ -102,10 +107,6 @@ class App extends Component {
             searchString : searchString
         });
     };
-
-    handleSearchResult() {
-
-    }
 
   render() {
       return (
