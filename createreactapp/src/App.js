@@ -72,8 +72,20 @@ class ArtistCards extends Component {
     ];
 
     state = {
-        previousCardPositions: this.cardPositions
+        previousCardPositions: [
+            {position: "relative", top: -standard_picture_offset, left: -standard_picture_offset},
+            {position: "relative", top: standard_picture_offset, left: -standard_picture_offset},
+            {position: "relative", top: standard_picture_offset, left: standard_picture_offset},
+            {position: "relative", top: -standard_picture_offset, left: standard_picture_offset}
+        ]
     };
+
+    goalPositions = [
+        {position: "relative", top: -standard_picture_offset, left: -standard_picture_offset},
+        {position: "relative", top: standard_picture_offset, left: -standard_picture_offset},
+        {position: "relative", top: standard_picture_offset, left: standard_picture_offset},
+        {position: "relative", top: -standard_picture_offset, left: standard_picture_offset}
+    ];
 
     randomHoverOffset() {
         return -.1 + .2 * Math.random();
@@ -83,22 +95,51 @@ class ArtistCards extends Component {
         return -40 + 80 * Math.random();
     }
 
+    setNewGoalPositions() {
+        this.goalPositions = this.cardPositions.map(position => {
+            var newLeft = position.left + this.randomStartOffset();
+            var newTop = position.top + this.randomStartOffset();
+
+            return {
+                position: position.position,
+                left: newLeft,
+                top: newTop
+            }
+        });
+
+        setTimeout(() => {
+            this.setNewGoalPositions();
+        }, 300);
+    }
+
     componentDidUpdate() {
         setTimeout(()=> {
-            console.log("hit");
+            console.log("updating positions");
 
-            var cardPositions = this.state.previousCardPositions.map(position => {
-                return {
-                    ...position,
-                    left: position.left + this.randomHoverOffset(),
-                    top: position.top + this.randomHoverOffset()
+            var cardPositions = [];
+            for (var i = 0; i < this.goalPositions.length; i++) {
+                var currentPosition = this.state.previousCardPositions[i];
+                var goalPosition = this.goalPositions[i];
+
+                var newLeft = currentPosition.left + 0.01 * (goalPosition.left - currentPosition.left);
+                var newTop = currentPosition.top + 0.01 * (goalPosition.top - currentPosition.top);
+
+                cardPositions[i] = {
+                    ...currentPosition,
+                    left: newLeft,
+                    top: newTop
                 }
-            });
+            }
 
             this.setState({
                 previousCardPositions: cardPositions
             });
         }, 1);
+    }
+
+    componentDidMount() {
+        console.log("updating goals");
+        this.setNewGoalPositions();
     }
 
     render() {
@@ -114,8 +155,9 @@ class ArtistCards extends Component {
                 //cardPosition.left += this.randomHoverOffset();
                 //cardPosition.top += this.randomHoverOffset();
                 //this.state.previousCardPositions[index] = cardPosition;
-                console.log(this.state.previousCardPositions);
+                //console.log(this.state.previousCardPositions);
                 //debugger;
+                //console.log(this.state.previousCardPositions[index].left);
                 return <ArtistCard artist={song} stylePosition={this.state.previousCardPositions[index]} />
             })}
             <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.selectedCardPosition}/>
