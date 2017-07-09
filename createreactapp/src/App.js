@@ -111,8 +111,8 @@ class App extends Component {
   render() {
       return (
           <MuiThemeProvider>
-              <div className="App">
-                  <TextField fullWidth={true} onChange={this.onSearchChange} onKeyPress={this.onSearchFieldKeyPress}/>
+              <div className="App" height="100%" width="100%" backgroundColor="#122329">
+                  <TextField fullWidth={true} onChange={this.onSearchChange} onKeyPress={this.onSearchFieldKeyPress} underlineFocusStyle={{borderColor: "#1BA64E", color: "#1BA64E"}} inputStyle={{color: "#FFFFFF"}}/>
                   <ArtistCards artists={this.state.artists}/>
               </div>
           </MuiThemeProvider>
