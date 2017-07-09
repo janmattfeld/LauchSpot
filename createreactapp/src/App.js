@@ -1,14 +1,24 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-var belle = require('belle');
-var TextInput = belle.TextInput;
+import p1 from './pics/1.jpg';
+import p2 from './pics/2.jpg';
+import p3 from './pics/3.jpg';
+const belle = require('belle');
+const TextInput = belle.TextInput;
+const Card = belle.Card;
 
 class App extends Component {
   render() {
-    return (
+      const picArray = [p1,p2,p3];
+      console.log("Array", picArray);
+      return (
       <div className="App">
-        <TextInput /
+          <TextInput placeholder="Insert your favourite album here"/>
+          {picArray.map((pic) => {
+              return (<Card>
+                  <img src={pic}/>
+              </Card>);
+          })}
       </div>
     );
   }
