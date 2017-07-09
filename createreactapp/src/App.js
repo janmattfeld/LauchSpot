@@ -2,17 +2,33 @@ import React, { Component } from 'react';
 import './App.css';
 
 import * as injectTapEventPlugin from 'react-tap-event-plugin';
-
-
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 import TextField from 'material-ui/TextField'
 import {Card, CardMedia, CardTitle} from 'material-ui/Card'
-// Needed for onTouchTap
+
+// Needed for onTouchTap by material-ui
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
+var SpotifyWeb = require('spotify-web-api-js');
+
 class Logic {
+    set(tracks, callback) {
+
+        console.log(tracks)
+
+        let result = {
+
+            'selectedSong': tracks[0],
+
+            'otherSongs': [tracks[1], tracks[2], tracks[3], tracks[4]]
+
+        };
+
+        callback(result);
+
+    }
+
     search(searchString, callback) {
         let song = {
             'titleName': 'Baba O\'Riley',
@@ -173,8 +189,123 @@ class ArtistCards extends Component {
 class App extends Component {
     state = {
         searchString: "",
-        artists: {}
+        artists: {},
+        spotify: new SpotifyWeb()
     };
+
+    componentWillMount() {
+
+        this.setState({artist: this.state.defaultArtist})
+
+        // Setup Spotify API
+
+        fetch("https://accounts.spotify.com/api/token", {
+
+            body: "grant_type=client_credentials",
+
+            headers: {
+
+                Authorization: "Basic ODA5MmJmNDc5MTIwNGU5NmE0ZjkyMjdmNWNhNWUzOGI6NGRhMjEzNDA1YTAzNGY4MWE5Mjk4MG" +
+
+                "E2YzNjYWRjZTg=",
+
+                "Content-Type": "application/x-www-form-urlencoded"
+
+            },
+
+            method: "POST"
+
+        }).then((response) => {
+
+            return response.json();
+
+        }).then((result) => {
+
+            this
+
+                .state
+
+                .spotify
+
+                .setAccessToken(result.access_token)
+
+        })
+
+    }
+
+    findArtist = (searchValue) => {
+
+        return new Promise((resolve, reject) => {
+
+            this
+
+                .state
+
+                .spotify
+
+                .searchArtists(searchValue, (err, data) => {
+
+                    if (err) {
+
+                        this.setState({artist: this.state.defaultArtist})
+
+                    } else {
+
+                        if (data.artists && data.artists.items[0] && data.artists.items[0].name && data.artists.items[0].images && data.artists.items[0].images[1]) {
+
+                            let newArtist = data.artists.items[0]
+
+                            this.setState({artist: newArtist})
+
+                            resolve(newArtist.id)
+
+                        } else {
+
+                            this.setState({artist: this.state.defaultArtist})
+
+                            reject()
+
+                        }
+
+                    }
+
+                })
+
+        });
+
+    }
+
+    findRelatedTracks = (artistID) => {
+
+        return new Promise((resolve, reject) => {
+
+            this
+
+                .state
+
+                .spotify
+
+                .getArtistTopTracks(artistID, 'DE', function (err, data) {
+
+                    if (err) {
+
+                        console.error(err);
+
+                        reject()
+
+                    } else {
+
+                        console.log(data);
+
+                        resolve(data)
+
+                    }
+
+                })
+
+        });
+
+    }
 
     l = new Logic();
 
@@ -185,8 +316,39 @@ class App extends Component {
 
     onSearchFieldKeyPress = (event) => {
         if (event.charCode === 13) {
-            this.l.search(this.state.searchString, this.onSearchResultSuccessfulCallback)
-        }
+            this
+
+                .findArtist(this.state.searchString)
+
+                .then(this.findRelatedTracks)
+
+                .then((tracks) => {
+
+                    console.log(tracks)
+
+                    let songs = []
+
+                    for (let i=0;i<5;i++) {
+
+                        songs[i]= {
+
+                            'titleName': tracks.tracks[i].name,
+
+                            'artist': tracks.tracks[i].artists[0].name,
+
+                            'titleCoverUri': tracks.tracks[i].album.images[0].url
+
+                        }
+
+                    }
+
+                    this
+
+                        .l
+
+                        .set(songs, this.onSearchResultSuccessfulCallback)
+
+                })        }
     };
 
     onSearchChange = (_, searchString) => {
