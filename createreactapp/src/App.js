@@ -7,7 +7,7 @@ import * as injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import TextField from 'material-ui/TextField'
-import {Card, CardMedia} from 'material-ui/Card'
+import {Card, CardMedia, CardTitle} from 'material-ui/Card'
 // Needed for onTouchTap
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
@@ -52,7 +52,9 @@ class ArtistCard extends Component {
             <div style={this.props.stylePosition}>
                 <Card style={{width: card_width, height: card_height, position: "relative", top: card_height_offset, left: card_width_offset}}
                       containerStyle={{width: card_width, height: card_height}}>
-                    <CardMedia mediaStyle={{width: image_width, height: image_height, display: "block"}}>
+                    <CardMedia
+                        mediaStyle={{width: image_width, height: image_height, display: "block"}}
+                        overlay={<CardTitle title={this.props.artist.titleName} subtitle={this.props.artist.artist} />}>
                         <img src={this.props.artist.titleCoverUri} alt="pic1"/>
                     </CardMedia>
                 </Card>
