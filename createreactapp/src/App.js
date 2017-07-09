@@ -28,7 +28,6 @@ class Logic {
                 song,
                 song,
                 song,
-                song,
                 song
             ]
         };
@@ -37,15 +36,59 @@ class Logic {
     }
 }
 
+class ArtistCard extends Component {
+    render() {
+        console.log("here: ", this.props.stylePosition);
+        return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
+            <div style={this.props.stylePosition}>
+                <Card style={{width: "300", height: "300", position: "relative", top: "-150", left: "-150"}}
+                      containerStyle={{width: "300", height: "300"}}>
+                    <CardMedia mediaStyle={{width: "300px", height: "300px", display: "block"}}>
+                        <img src={this.props.artist.titleCoverUri} alt="pic1"/>
+                    </CardMedia>
+                </Card>
+            </div>
+        </div>)
+    }
+}
+
+class ArtistCards extends Component {
+    cardPositions = [
+        {position: "relative", top: "-150", left: "-150"},
+        {position: "relative", top: "150", left: "-150"},
+        {position: "relative", top: "150", left: "150"},
+        {position: "relative", top: "-150", left: "150"}
+    ];
+
+    render() {
+        console.log(this.props.artists);
+        if(Object.keys(this.props.artists).length === 0) {
+            return <div/>;
+        }
+        return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
+
+            {this.props.artists["otherSongs"].map((song, index) => {
+                console.log("position: ", this.cardPositions[index]);
+                return <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.cardPositions[index]} />
+            })}
+
+            <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={{position: "relative", top: "0", left: "0"}}/>
+            
+            </div>)
+    }
+}
+
 class App extends Component {
     state = {
-        searchString: ""
+        searchString: "",
+        artists: {}
     };
 
     l = new Logic();
 
     onSearchResultSuccessfulCallback = (result) => {
-        console.log(result);
+        //console.log(result);
+        this.setState({ artists: result })
     };
 
     onSearchFieldKeyPress = (event) => {
@@ -65,20 +108,11 @@ class App extends Component {
     }
 
   render() {
-      const cardStyle= {width: '100%', padding: '0px 0', boxShadow: '0px', margin: '0px', display: 'inline'};
       return (
           <MuiThemeProvider>
               <div className="App">
                   <TextField fullWidth={true} onChange={this.onSearchChange} onKeyPress={this.onSearchFieldKeyPress}/>
-
-                  <div style={{position: "absolute", top: "50%", left: "50%"}}>
-                  <Card style={{width: "300", height: "300", position: "relative", top: "-150", left: "-150"}}
-                        containerStyle={{width: "300", height: "300"}}>
-                      <CardMedia mediaStyle={{width: "300px", height: "300px", display: "block"}}>
-                        <img src="http://www.thewho.com/wp-content/uploads/2012/08/39-02-the_who_ultimate_coll-us-300x300.jpg" alt="pic1"/>
-                      </CardMedia>
-                  </Card>
-                  </div>
+                  <ArtistCards artists={this.state.artists}/>
               </div>
           </MuiThemeProvider>
     );
