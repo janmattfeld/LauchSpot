@@ -156,7 +156,15 @@ class App extends Component {
       return (
           <MuiThemeProvider>
               <div className="App">
-                  <TextField name="searchField" style={{width: "50%"}} onChange={this.onSearchChange} onKeyPress={this.onSearchFieldKeyPress} underlineFocusStyle={{borderColor: "#1BA64E", color: "#1BA64E"}} inputStyle={{color: "#FFFFFF"}}/>
+                  <TextField
+                      name="searchField"
+                      hintText={<p>Link your favourite song here.</p>}
+                      hintStyle={{color: "#FFFFFF"}}
+                      style={{width: "50%", marginTop: "20px"}}
+                      onChange={this.onSearchChange}
+                      onKeyPress={this.onSearchFieldKeyPress}
+                      underlineFocusStyle={{borderColor: "#1BA64E"}}
+                      inputStyle={{color: "#FFFFFF"}}/>
                   <ArtistCards artists={this.state.artists}/>
               </div>
           </MuiThemeProvider>
