@@ -3,7 +3,7 @@ import {Card, CardMedia, CardTitle} from 'material-ui/Card'
 
 var Vector = require('victor');
 
-var box_dimension=500;
+var box_dimension=250;
 var card_height=box_dimension;
 var card_width=box_dimension;
 var card_height_offset=-card_height / 2;
