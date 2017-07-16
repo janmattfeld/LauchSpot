@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {Card, CardMedia, CardTitle} from 'material-ui/Card'
 
+var Vector = require('victor');
+
 var box_dimension=500;
 var card_height=box_dimension;
 var card_width=box_dimension;
@@ -29,93 +31,103 @@ class ArtistCard extends Component {
 }
 
 class ArtistCards extends Component {
-    selectedCardPosition = {position: "relative", top: "0", left: "0"};
+    // management
+    selectedSongTitleName = null;
 
-    cardPositions = [
-        {position: "relative", top: -standard_picture_offset, left: -standard_picture_offset},
-        {position: "relative", top: standard_picture_offset, left: -standard_picture_offset},
-        {position: "relative", top: standard_picture_offset, left: standard_picture_offset},
-        {position: "relative", top: -standard_picture_offset, left: standard_picture_offset}
+    // placement & movement
+    selectedCardPosition = new Vector(0, 0);
+    initialCardPositions = [
+        new Vector(-standard_picture_offset, -standard_picture_offset),
+        new Vector(standard_picture_offset, -standard_picture_offset),
+        new Vector(standard_picture_offset, standard_picture_offset),
+        new Vector(-standard_picture_offset, standard_picture_offset)
     ];
+    directionOffsets = [
+        new Vector(0, 0),
+        new Vector(0, 0),
+        new Vector(0, 0),
+        new Vector(0, 0)
+    ];
+    phase = 0;
+    phaseOffsets = [ 0, .3, .6, .9 ];
+    waveDirection = new Vector(1, 1).norm();
 
+    // view
     state = {
-        previousCardPositions: [
-            {position: "relative", top: -standard_picture_offset, left: -standard_picture_offset},
-            {position: "relative", top: standard_picture_offset, left: -standard_picture_offset},
-            {position: "relative", top: standard_picture_offset, left: standard_picture_offset},
-            {position: "relative", top: -standard_picture_offset, left: standard_picture_offset}
-        ]
+        cardPositions: this.deepCopyVectorArray(this.initialCardPositions)
     };
 
-    goalPositions = [
-        {position: "relative", top: -standard_picture_offset, left: -standard_picture_offset},
-        {position: "relative", top: standard_picture_offset, left: -standard_picture_offset},
-        {position: "relative", top: standard_picture_offset, left: standard_picture_offset},
-        {position: "relative", top: -standard_picture_offset, left: standard_picture_offset}
-    ];
-
-    randomHoverOffset() {
-        return -.1 + .2 * Math.random();
-    }
-
-    randomStartOffset() {
-        return -40 + 80 * Math.random();
-    }
-
-    setNewGoalPositions() {
-        this.goalPositions = this.cardPositions.map(position => {
-            var newLeft = position.left + this.randomStartOffset();
-            var newTop = position.top + this.randomStartOffset();
-
-            return {
-                position: position.position,
-                left: newLeft,
-                top: newTop
-            }
-        });
-
-        setTimeout(() => {
-            this.setNewGoalPositions();
-        }, 300);
+    deepCopyVectorArray(array) {
+        return array.map(vector => vector.clone());
     }
 
     componentDidUpdate() {
-        setTimeout(()=> {
-            var cardPositions = [];
-            for (var i = 0; i < this.goalPositions.length; i++) {
-                var currentPosition = this.state.previousCardPositions[i];
-                var goalPosition = this.goalPositions[i];
+        setTimeout(()=> { 
+            var newCardPositions = this.deepCopyVectorArray(this.state.cardPositions); 
 
-                var newLeft = currentPosition.left + 0.01 * (goalPosition.left - currentPosition.left);
-                var newTop = currentPosition.top + 0.01 * (goalPosition.top - currentPosition.top);
+            for (var i = 0; i < newCardPositions.length; i++) {
+                var newCardPosition = this.initialCardPositions[i].clone();
 
-                cardPositions[i] = {
-                    ...currentPosition,
-                    left: newLeft,
-                    top: newTop
-                }
+                this.directionOffsets[i].x += -.01 + .02 * Math.random();
+                this.directionOffsets[i].y += -.01 + .02 * Math.random();
+
+                var offset = this.waveDirection.clone().add(this.directionOffsets[i]);
+                var scalarOffset = 10 * Math.sin((this.phase + this.phaseOffsets[i]) * 2 * Math.PI);
+                offset.x *= scalarOffset;
+                offset.y *= scalarOffset;
+
+                newCardPosition.add(offset);
+
+                newCardPositions[i] = newCardPosition;
             }
-
-            this.setState({
-                previousCardPositions: cardPositions
-            });
+            this.phase += .001;
+ 
+            this.setState({ 
+                cardPositions: newCardPositions 
+            }); 
         }, 1);
     }
 
+    resetCardPositions() {
+        this.setState({ 
+            cardPositions: this.deepCopyVectorArray(this.initialCardPositions) 
+        }); 
+    }
+
+    resetCardPositionsOnSelf(self) {
+        self.setState({ 
+            cardPositions: self.deepCopyVectorArray(self.initialCardPositions) 
+        }); 
+    }
+
     componentDidMount() {
-        this.setNewGoalPositions();
+        this.resetCardPositions();
+    }
+
+    getStyleForPosition(vector) {
+        return {position: "relative", top: vector.y, left: vector.x};
     }
 
     render() {
-        if(this.objectIsEmpty(this.props.artists)) {
-            return <div/>;
+        if (this.objectIsEmpty(this.props.artists)) {
+            return <div />;
+        }
+
+        if (this.selectedSongTitleName !== this.props.artists.selectedSong.titleName) {
+            setTimeout(this.resetCardPositionsOnSelf, 1, this);
+            this.selectedSongTitleName = this.props.artists.selectedSong.titleName;
         }
 
         return (<div style={{position: "absolute", top: "50%", left: "50%"}}>
             {this.props.artists["otherSongs"].map((song, index) => {
-                return <ArtistCard key={"song" + index} artist={song} stylePosition={this.state.previousCardPositions[index]} />
+                return <ArtistCard key={"song" + index} 
+                            artist={song}
+                            stylePosition={this.getStyleForPosition(this.state.cardPositions[index])}
+                        />
             })}
-            <ArtistCard artist={this.props.artists["selectedSong"]} stylePosition={this.selectedCardPosition}/>
+            <ArtistCard artist={this.props.artists["selectedSong"]}
+                            stylePosition={this.getStyleForPosition(this.selectedCardPosition)}
+             />
         </div>)
     }
 
