@@ -72,7 +72,7 @@ class ArtistCards extends Component {
                 this.directionOffsets[i].y += -.01 + .02 * Math.random();
 
                 var offset = this.waveDirection.clone().add(this.directionOffsets[i]);
-                var scalarOffset = 10 * Math.sin((this.phase + this.phaseOffsets[i]) * 2 * Math.PI);
+                var scalarOffset = 2 * Math.sin((this.phase + this.phaseOffsets[i]) * 2 * Math.PI);
                 offset.x *= scalarOffset;
                 offset.y *= scalarOffset;
 
